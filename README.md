@@ -1,6 +1,6 @@
-# 🎯 Wordle Solver
+# Wordle Solver
 
-An intelligent Wordle solver that uses information theory and entropy calculations to find optimal guesses. Solves most puzzles in 3-4 attempts with a 99.5%+ success rate.
+A Wordle solver largely inspired by [this 3Blue1Brown video](https://youtu.be/v68zYyaEmEA?si=PAkyAdpUDy6BNUVB)
 
 ## 🚀 Quick Start
 
@@ -140,7 +140,7 @@ The solver uses an **entropy-maximization approach**:
 
 ## 🏗️ Architecture
 
-The codebase follows a clean, modular architecture:
+The codebase follows a modular architecture:
 
 ```
 src/
@@ -167,12 +167,6 @@ npm run test:coverage
 npm test -- tests/entropy.test.ts
 npm test -- tests/solver.test.ts
 ```
-
-The test suite covers:
-- ✅ Unit tests for each module
-- ✅ Integration tests for end-to-end workflows  
-- ✅ Performance benchmarks
-- ✅ Edge cases and error handling
 
 ## 📊 Algorithm Details
 
@@ -238,64 +232,7 @@ npm run test           # Run test suite
 npm run test:watch     # Run tests in watch mode
 ```
 
-## 🎯 Why This Solver Works
-
-### Mathematical Foundation
-
-The solver leverages **information theory** principles:
-
-- **Entropy** measures uncertainty in the remaining word set
-- **Information Gain** quantifies how much a guess reduces uncertainty
-- **Optimal Strategy** always chooses the highest expected information gain
-
-### Proven Performance
-
-- Based on research into optimal Wordle strategies
-- Uses "SLATE" as the mathematically optimal first guess
-- Consistently outperforms human players and simpler algorithms
-
-### Real-World Testing
-
-Extensively tested against:
-- ✅ All official Wordle answers
-- ✅ Extended word lists
-- ✅ Edge cases and corner scenarios
-- ✅ Performance benchmarks
-
-## 📈 Performance Comparison
-
-| Strategy | Avg Attempts | Success Rate |
-|----------|--------------|--------------|
-| This Solver | 3.7 | 99.5% |
-| Human Average | 4.5 | 87% |
-| Random Guessing | 5.8 | 62% |
-| Frequency-Based | 4.2 | 94% |
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes with tests
-4. Run the test suite: `npm test`
-5. Submit a pull request
-
-### Code Style
-
-- TypeScript with strict mode
-- ESLint + Prettier formatting
-- Comprehensive JSDoc comments
-- 100% test coverage for new features
-
-## 📝 License
-
-MIT License - see LICENSE file for details.
-
 ## 🙏 Acknowledgments
 
-- Inspired by information theory research on optimal Wordle strategies
-- Word list sourced from official Wordle game data
-- Algorithm optimizations based on entropy maximization principles
-
----
-
-**Happy Wordling!** 🎉
+- **Word list**: [steve-kasica/wordle-words](https://github.com/steve-kasica/wordle-words/tree/master)
+- **Inspiration**: [3Blue1Brown - Solving Wordle using information theory](https://youtu.be/v68zYyaEmEA?si=PAkyAdpUDy6BNUVB)
