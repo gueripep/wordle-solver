@@ -207,7 +207,7 @@ function handleSolveCommand(args: string[]) {
                 }
             }).join('');
             
-            console.log(`${i + 1}. ${attempt.guess} ${colors} (${attempt.remainingWords} words remaining)`);
+            console.log(`${i + 1}. ${attempt.guess} ${colors} (${attempt.remainingWords} word${attempt.remainingWords === 1 ? '' : 's'} remaining)`);
         }
         
         if (result.solved) {

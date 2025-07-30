@@ -340,7 +340,7 @@ export function solveWordle(targetWord: string, maxAttempts: number = 6): SolveR
         }
         
         // Get remaining words count after this feedback
-        const remainingWordsAfterFeedback = solved ? 1 : getAvailableWordsFromMultipleFeedbacks(feedbackHistory).length;
+        const remainingWordsAfterFeedback = solved ? 0 : getAvailableWordsFromMultipleFeedbacks(feedbackHistory).length;
         
         // Record this attempt
         attempts.push({
