@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-import { getAverageEntropy, getLetterStateProbabilitiesWithSelfInformation, solveWordle } from '../core/guess.js';
+import { calculateAverageEntropy, calculateLetterStateProbabilities } from '../core/entropy.js';
+import { solveWordle } from '../services/solver.js';
 
 /**
  * Simple CLI for testing Wordle solver functions
@@ -81,14 +82,14 @@ function handleEntropyCommand(args: string[]) {
     
     try {
         const startTime = Date.now();
-        const averageEntropy = getAverageEntropy(word);
+        const averageEntropy = calculateAverageEntropy(word);
         const endTime = Date.now();
         
         console.log(`Average Entropy: ${averageEntropy.toFixed(4)} bits`);
         console.log(`Calculation time: ${endTime - startTime}ms`);
         
         // Show some additional context
-        const probabilityData = getLetterStateProbabilitiesWithSelfInformation(word);
+        const probabilityData = calculateLetterStateProbabilities(word);
         console.log(`Number of possible feedback patterns: ${probabilityData.length}`);
         
         // Show top 5 most likely outcomes
@@ -140,11 +141,11 @@ function handleCompareCommand(args: string[]) {
     
     try {
         const startTime1 = Date.now();
-        const entropy1 = getAverageEntropy(word1);
+        const entropy1 = calculateAverageEntropy(word1);
         const endTime1 = Date.now();
         
         const startTime2 = Date.now();
-        const entropy2 = getAverageEntropy(word2);
+        const entropy2 = calculateAverageEntropy(word2);
         const endTime2 = Date.now();
         
         console.log(`${word1}: ${entropy1.toFixed(4)} bits (${endTime1 - startTime1}ms)`);

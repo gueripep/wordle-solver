@@ -34,6 +34,24 @@ export interface GuessWithFeedback {
 }
 
 /**
+ * Represents a single guess attempt in the solving process
+ */
+export interface GuessAttempt {
+    guess: string;
+    feedback: GuessFeedback;
+    remainingWords: number;
+}
+
+/**
+ * Represents the result of solving a Wordle puzzle
+ */
+export interface SolveResult {
+    attempts: GuessAttempt[];
+    solved: boolean;
+    targetWord: string;
+}
+
+/**
  * Represents the information of a GuessFeedback state
  */
 export type GuessFeedbackInformations = {

@@ -16,7 +16,7 @@
             "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "run",
-                "test"
+                "test:debug"
             ],
             "console": "integratedTerminal"
         },
