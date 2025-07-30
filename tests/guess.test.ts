@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { test } from 'node:test';
-import { addEntropyToFeedback, getAverageEntropy, getLetterStateProbabilities, getLetterStateProbabilitiesWithEntropy, getWordList, getWordleReturnValue } from '../src/core/guess.js';
-import { LetterState } from '../src/core/types.js';
+import { addSelfInformationToFeedback, getAvailableWordsFromFeedback, getAverageEntropy, getHighestEntropyGuess, getLetterStateProbabilities, getLetterStateProbabilitiesWithSelfInformation, getWordList, getWordleReturnValue } from '../src/core/guess.js';
+import { HighestEntropyResult, LetterState } from '../src/core/types.js';
 
 test('getWordList should return a list of strings', () => {
     const wordList = getWordList();
@@ -103,69 +103,69 @@ test('getLetterStateProbabilities should have probabilities sum to approximately
         `Total probability should be approximately 1, got ${totalProbability}`);
 });
 
-test('addEntropyToFeedback should correctly calculate entropy', () => {
+test('addSelfInformationToFeedback should correctly calculate self-information', () => {
     const probabilities = getLetterStateProbabilities('HOUSE');
-    const withEntropy = addEntropyToFeedback(probabilities);
+    const withSelfInformation = addSelfInformationToFeedback(probabilities);
     
     // Basic structure validation
-    assert.strictEqual(withEntropy.length, probabilities.length, 'Should have same number of elements');
+    assert.strictEqual(withSelfInformation.length, probabilities.length, 'Should have same number of elements');
     
-    for (let i = 0; i < withEntropy.length; i++) {
+    for (let i = 0; i < withSelfInformation.length; i++) {
         const original = probabilities[i];
-        const withEnt = withEntropy[i];
+        const withSelfInfo = withSelfInformation[i];
         
         // Should preserve original properties
-        assert.deepStrictEqual(withEnt.guessFeedback, original.guessFeedback, 'guessFeedback should be preserved');
-        assert.strictEqual(withEnt.probability, original.probability, 'probability should be preserved');
+        assert.deepStrictEqual(withSelfInfo.guessFeedback, original.guessFeedback, 'guessFeedback should be preserved');
+        assert.strictEqual(withSelfInfo.probability, original.probability, 'probability should be preserved');
         
-        // Should have entropy calculated
-        assert('entropy' in withEnt, 'Should have entropy property');
-        assert(typeof withEnt.entropy === 'number', 'Entropy should be a number');
+        // Should have self-information calculated
+        assert('selfInformation' in withSelfInfo, 'Should have selfInformation property');
+        assert(typeof withSelfInfo.selfInformation === 'number', 'Self-information should be a number');
         
-        // Entropy should be -log2(probability)
-        const expectedEntropy = original.probability > 0 ? -Math.log2(original.probability) : 0;
-        assert(Math.abs(withEnt.entropy! - expectedEntropy) < 0.000001, 
-            `Entropy should be -log2(probability), expected ${expectedEntropy}, got ${withEnt.entropy}`);
+        // Self-information should be -log2(probability)
+        const expectedSelfInformation = original.probability > 0 ? -Math.log2(original.probability) : 0;
+        assert(Math.abs(withSelfInfo.selfInformation! - expectedSelfInformation) < 0.000001, 
+            `Self-information should be -log2(probability), expected ${expectedSelfInformation}, got ${withSelfInfo.selfInformation}`);
         
-        // Entropy should be non-negative
-        assert(withEnt.entropy! >= 0, 'Entropy should be non-negative');
+        // Self-information should be non-negative
+        assert(withSelfInfo.selfInformation! >= 0, 'Self-information should be non-negative');
         
-        // Higher probability should mean lower entropy
+        // Higher probability should mean lower self-information
         if (original.probability > 0) {
-            assert(withEnt.entropy! > 0, 'Entropy should be positive for non-zero probability');
+            assert(withSelfInfo.selfInformation! > 0, 'Self-information should be positive for non-zero probability');
         }
     }
 });
 
-test('getLetterStateProbabilitiesWithEntropy should return complete data', () => {
-    const withEntropy = getLetterStateProbabilitiesWithEntropy('HOUSE');
+test('getLetterStateProbabilitiesWithSelfInformation should return complete data', () => {
+    const withSelfInformation = getLetterStateProbabilitiesWithSelfInformation('HOUSE');
     const probabilities = getLetterStateProbabilities('HOUSE');
     
     // Should have same structure as probability-only version
-    assert.strictEqual(withEntropy.length, probabilities.length, 'Should have same number of elements');
+    assert.strictEqual(withSelfInformation.length, probabilities.length, 'Should have same number of elements');
     
-    for (let i = 0; i < withEntropy.length; i++) {
-        const item = withEntropy[i];
+    for (let i = 0; i < withSelfInformation.length; i++) {
+        const item = withSelfInformation[i];
         
         // Should have all required properties
         assert('guessFeedback' in item, 'Should have guessFeedback property');
         assert('probability' in item, 'Should have probability property');
-        assert('entropy' in item, 'Should have entropy property');
+        assert('selfInformation' in item, 'Should have selfInformation property');
         
         // All properties should be valid
         assert(typeof item.probability === 'number', 'Probability should be a number');
-        assert(typeof item.entropy === 'number', 'Entropy should be a number');
+        assert(typeof item.selfInformation === 'number', 'Self-information should be a number');
         assert(item.probability >= 0 && item.probability <= 1, 'Probability should be between 0 and 1');
-        assert(item.entropy >= 0, 'Entropy should be non-negative');
+        assert(item.selfInformation >= 0, 'Self-information should be non-negative');
         
-        // Verify entropy calculation
-        const expectedEntropy = item.probability > 0 ? -Math.log2(item.probability) : 0;
-        assert(Math.abs(item.entropy - expectedEntropy) < 0.000001, 
-            `Entropy should match -log2(probability)`);
+        // Verify self-information calculation
+        const expectedSelfInformation = item.probability > 0 ? -Math.log2(item.probability) : 0;
+        assert(Math.abs(item.selfInformation - expectedSelfInformation) < 0.000001, 
+            `Self-information should match -log2(probability)`);
     }
     
     // Should still sum to approximately 1
-    const totalProbability = withEntropy.reduce((sum, item) => sum + item.probability, 0);
+    const totalProbability = withSelfInformation.reduce((sum, item) => sum + item.probability, 0);
     assert(Math.abs(totalProbability - 1.0) < 0.000001, 
         `Total probability should be approximately 1, got ${totalProbability}`);
 });
@@ -179,10 +179,10 @@ test('getAverageEntropy should return valid entropy value', () => {
     assert(isFinite(averageEntropy), 'Average entropy should be finite');
     
     // Verify calculation manually
-    const withEntropy = getLetterStateProbabilitiesWithEntropy('HOUSE');
+    const withSelfInformation = getLetterStateProbabilitiesWithSelfInformation('HOUSE');
     let expectedAverage = 0;
-    for (const item of withEntropy) {
-        expectedAverage += item.probability * item.entropy!;
+    for (const item of withSelfInformation) {
+        expectedAverage += item.probability * item.selfInformation!;
     }
     
     assert(Math.abs(averageEntropy - expectedAverage) < 0.000001, 
@@ -196,5 +196,107 @@ test('getAverageEntropy should return valid entropy value', () => {
     const anotherEntropy = getAverageEntropy('ADIEU');
     assert(typeof anotherEntropy === 'number', 'Should work with different words');
     assert(anotherEntropy >= 0, 'Should be non-negative for any word');
+});
+
+test('HighestEntropyResult class should work correctly', () => {
+    const result1 = new HighestEntropyResult('HOUSE', 5.5);
+    const result2 = new HighestEntropyResult('ADIEU', 6.2);
+    
+    // Test basic properties
+    assert.strictEqual(result1.guess, 'HOUSE', 'Should store guess correctly');
+    assert.strictEqual(result1.averageEntropy, 5.5, 'Should store entropy correctly');
+    
+    // Test toString method
+    const str = result1.toString();
+    assert(typeof str === 'string', 'toString should return a string');
+    assert(str.includes('HOUSE'), 'toString should include the guess');
+    assert(str.includes('5.5000'), 'toString should include formatted entropy');
+    
+    // Test comparison method
+    assert(result2.isHigherEntropyThan(result1), 'Should correctly identify higher entropy');
+    assert(!result1.isHigherEntropyThan(result2), 'Should correctly identify lower entropy');
+    
+    // Test equal entropy
+    const result3 = new HighestEntropyResult('EQUAL', 5.5);
+    assert(!result1.isHigherEntropyThan(result3), 'Equal entropy should return false');
+    assert(!result3.isHigherEntropyThan(result1), 'Equal entropy should return false (reverse)');
+});
+
+test('getHighestEntropyGuess should return valid result', () => {
+    // Use a small subset of words for testing to make it faster
+    const testWordList = ['HOUSE', 'ADIEU', 'ARISE', 'SOARE', 'TEARS', 'ROATE'];
+    const result = getHighestEntropyGuess(testWordList);
+    
+    // Basic validation
+    assert(result instanceof HighestEntropyResult, 'Should return HighestEntropyResult instance');
+    assert(typeof result.guess === 'string', 'Guess should be a string');
+    assert.strictEqual(result.guess.length, 5, 'Guess should be 5 letters');
+    assert(typeof result.averageEntropy === 'number', 'Average entropy should be a number');
+    assert(result.averageEntropy >= 0, 'Average entropy should be non-negative');
+    assert(isFinite(result.averageEntropy), 'Average entropy should be finite');
+    
+    // Validate that the guess is actually from the test word list
+    assert(testWordList.includes(result.guess.toUpperCase()), 'Guess should be from the test word list');
+    
+    // Verify that this is actually the highest entropy by checking all other words in our test list
+    for (const testWord of testWordList) {
+        const testEntropy = getAverageEntropy(testWord);
+        assert(result.averageEntropy >= testEntropy, 
+            `Result entropy (${result.averageEntropy}) should be >= test word "${testWord}" entropy (${testEntropy})`);
+    }
+    
+    // Test that toString works
+    const resultString = result.toString();
+    assert(typeof resultString === 'string', 'toString should work');
+    assert(resultString.includes(result.guess), 'toString should include the guess');
+    
+    // Test with empty word list should throw error
+    assert.throws(() => {
+        getHighestEntropyGuess([]);
+    }, 'Should throw error with empty word list');
+});
+
+test('getAvailableWordsFromFeedback should return matching words', () => {
+    // Test basic functionality
+    const feedback = getWordleReturnValue('HOUSE', 'MOUSE');
+    const availableWords = getAvailableWordsFromFeedback(feedback);
+    
+    assert(Array.isArray(availableWords), 'Should return an array');
+    assert(availableWords.length > 0, 'Should return at least one word');
+    assert(availableWords.includes('mouse'), 'Should include the target word');
+    
+    // Test perfect match
+    const perfectFeedback = getWordleReturnValue('HOUSE', 'HOUSE');
+    const perfectMatch = getAvailableWordsFromFeedback(perfectFeedback);
+    
+    assert.strictEqual(perfectMatch.length, 1, 'Perfect match should return exactly one word');
+    assert.strictEqual(perfectMatch[0], 'house', 'Perfect match should return the exact word');
+});
+
+test('getLetterStateProbabilities should include matching words cache', () => {
+    const probabilities = getLetterStateProbabilities('HOUSE');
+    
+    // Check that matchingWords property exists and is populated
+    assert(probabilities.length > 0, 'Should return probability data');
+    assert('matchingWords' in probabilities[0], 'Should have matchingWords property');
+    assert(Array.isArray(probabilities[0].matchingWords), 'matchingWords should be an array');
+    assert(probabilities[0].matchingWords!.length > 0, 'matchingWords should not be empty');
+});
+
+test('getAvailableWordsFromFeedback optimization works correctly', () => {
+    // Simple test: exact match should return only the target word
+    const perfectFeedback = getWordleReturnValue('HOUSE', 'HOUSE');
+    const perfectMatch = getAvailableWordsFromFeedback(perfectFeedback);
+    
+    assert.strictEqual(perfectMatch.length, 1, 'Perfect match should return exactly one word');
+    assert.strictEqual(perfectMatch[0], 'house', 'Should return the exact word');
+    
+    // Test with a partial match
+    const feedback = getWordleReturnValue('HOUSE', 'MOUSE');
+    const availableWords = getAvailableWordsFromFeedback(feedback);
+    
+    assert(Array.isArray(availableWords), 'Should return an array');
+    assert(availableWords.length > 0, 'Should return at least one word');
+    assert(availableWords.includes('mouse'), 'Should include the target word');
 });
 

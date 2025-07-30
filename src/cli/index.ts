@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { getAverageEntropy, getLetterStateProbabilitiesWithEntropy } from '../core/guess.js';
+import { getAverageEntropy, getLetterStateProbabilitiesWithSelfInformation, solveWordle } from '../core/guess.js';
 
 /**
  * Simple CLI for testing Wordle solver functions
@@ -22,6 +22,9 @@ function main() {
         case 'compare':
             handleCompareCommand(args.slice(1));
             break;
+        case 'solve':
+            handleSolveCommand(args.slice(1));
+            break;
         case 'help':
         case '--help':
         case '-h':
@@ -41,12 +44,14 @@ Wordle Solver CLI
 Usage:
   npm run dev entropy <word>           Calculate average entropy for a word
   npm run dev compare <word1> <word2>  Compare average entropy of two words
+  npm run dev solve <target>           Solve a Wordle puzzle for a target word
   npm run dev help                     Show this help message
 
 Examples:
   npm run dev entropy HOUSE
   npm run dev entropy ADIEU
   npm run dev compare HOUSE ADIEU
+  npm run dev solve HOUSE
 
 Note: Words should be exactly 5 letters long.
 `);
@@ -83,7 +88,7 @@ function handleEntropyCommand(args: string[]) {
         console.log(`Calculation time: ${endTime - startTime}ms`);
         
         // Show some additional context
-        const probabilityData = getLetterStateProbabilitiesWithEntropy(word);
+        const probabilityData = getLetterStateProbabilitiesWithSelfInformation(word);
         console.log(`Number of possible feedback patterns: ${probabilityData.length}`);
         
         // Show top 5 most likely outcomes
@@ -99,7 +104,7 @@ function handleEntropyCommand(args: string[]) {
                     default: return '?';
                 }
             }).join('');
-            console.log(`${i + 1}. ${pattern} (${(item.probability * 100).toFixed(2)}% - ${item.entropy!.toFixed(2)} bits)`);
+            console.log(`${i + 1}. ${pattern} (${(item.probability * 100).toFixed(2)}% - ${item.selfInformation!.toFixed(2)} bits)`);
         }
         
     } catch (error) {
@@ -155,6 +160,76 @@ function handleCompareCommand(args: string[]) {
         
     } catch (error) {
         console.error('Error calculating entropy:', error);
+        process.exit(1);
+    }
+}
+
+function handleSolveCommand(args: string[]) {
+    if (args.length !== 1) {
+        console.error('Error: solve command requires exactly one target word');
+        console.log('Usage: npm run dev solve <target>');
+        process.exit(1);
+    }
+    
+    const targetWord = args[0].toUpperCase();
+    
+    if (targetWord.length !== 5) {
+        console.error('Error: Target word must be exactly 5 letters long');
+        process.exit(1);
+    }
+    
+    if (!/^[A-Z]+$/.test(targetWord)) {
+        console.error('Error: Target word must contain only letters');
+        process.exit(1);
+    }
+    
+    console.log(`\nSolving Wordle for target word: ${targetWord}`);
+    console.log('═'.repeat(50));
+    
+    try {
+        const startTime = Date.now();
+        const result = solveWordle(targetWord);
+        const endTime = Date.now();
+        
+        console.log(`\nAttempts: ${result.attempts.length}/6`);
+        console.log(`Solved: ${result.solved ? '✅ Yes' : '❌ No'}`);
+        console.log(`Time: ${endTime - startTime}ms\n`);
+        
+        // Display each attempt with Wordle-style feedback
+        for (let i = 0; i < result.attempts.length; i++) {
+            const attempt = result.attempts[i];
+            const colors = attempt.feedback.map(f => {
+                switch (f.state) {
+                    case 'correct': return '🟩';
+                    case 'present': return '🟨';
+                    case 'absent': return '⬜';
+                    default: return '?';
+                }
+            }).join('');
+            
+            console.log(`${i + 1}. ${attempt.guess} ${colors} (${attempt.remainingWords} words remaining)`);
+        }
+        
+        if (result.solved) {
+            const attempts = result.attempts.length;
+            let performance: string;
+            if (attempts <= 2) performance = 'Exceptional! 🎯';
+            else if (attempts <= 3) performance = 'Excellent! 🔥';
+            else if (attempts <= 4) performance = 'Good! 👍';
+            else if (attempts <= 5) performance = 'Not bad! 👌';
+            else performance = 'Close call! 😅';
+            
+            console.log(`\n${performance} Solved in ${attempts} attempt${attempts === 1 ? '' : 's'}!`);
+        } else {
+            console.log('\n😔 Failed to solve within 6 attempts.');
+            if (result.attempts.length > 0) {
+                const lastAttempt = result.attempts[result.attempts.length - 1];
+                console.log(`${lastAttempt.remainingWords} possible word${lastAttempt.remainingWords === 1 ? '' : 's'} remaining.`);
+            }
+        }
+        
+    } catch (error) {
+        console.error('Error solving puzzle:', error);
         process.exit(1);
     }
 }
