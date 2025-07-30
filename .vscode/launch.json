@@ -1,0 +1,33 @@
+{
+    "compounds": [
+        {
+            "name": "Run & Attach Tests",
+            "configurations": [
+                "Run Tests",
+                "Attach to Process"
+            ]
+        }
+    ],
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Run Tests",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "test"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "node",
+            "request": "attach",
+            "name": "Attach to Process",
+            "port": 9229,
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        }
+    ]
+}

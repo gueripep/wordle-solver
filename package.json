@@ -1,0 +1,14 @@
+{
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli/index.ts",
+    "test": "node --inspect-brk --test --import tsx/esm tests/**/*.test.ts",
+    "test:watch": "node --test --watch --import tsx/esm tests/**/*.test.ts"
+  }
+}
