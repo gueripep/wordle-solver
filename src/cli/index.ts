@@ -304,7 +304,7 @@ async function handleDailyCommand(args: string[]) {
             dateDescription = DailyWordleService.formatDate(date);
         } else {
             // Today's puzzle
-            wordleData = await DailyWordleService.getTodaysWordle();
+            wordleData = await DailyWordleService.getTodaysWordleData();
             dateDescription = DailyWordleService.formatDate(wordleData.print_date);
         }
         

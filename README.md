@@ -63,6 +63,12 @@ Excellent! 🔥 Solved in 3 attempts!
 
 ## 📚 Programmatic API
 
+### Installation
+
+```bash
+npm install @gueripep/wordle-solver
+```
+
 ### Basic Usage
 
 ```typescript
@@ -70,6 +76,10 @@ import { solveWordle, calculateAverageEntropy, findHighestEntropyGuess } from '@
 
 // Solve a puzzle
 const result = solveWordle('HOUSE');
+console.log(`Solved in ${result.attempts.length} attempts: ${result.solved}`);
+
+// Solve today's wordle
+const result = DailyWordleService.solveTodaysWordle();
 console.log(`Solved in ${result.attempts.length} attempts: ${result.solved}`);
 
 // Calculate entropy for a word

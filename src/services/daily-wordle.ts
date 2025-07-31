@@ -2,6 +2,9 @@
  * Service for fetching and managing daily Wordle puzzles from NYTimes
  */
 
+import { SolveResult } from "../core/types.js";
+import { solveWordle } from "./solver.js";
+
 export interface DailyWordleData {
     id: number;
     solution: string;
@@ -16,19 +19,19 @@ export class DailyWordleService {
     /**
      * Fetch today's Wordle puzzle
      */
-    public static async getTodaysWordle(): Promise<DailyWordleData> {
+    public static async getTodaysWordleData(): Promise<DailyWordleData> {
         const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
         const url = `${this.BASE_URL}${today}.json`;
 
         try {
             const response = await fetch(url);
-            
+
             if (!response.ok) {
                 throw new Error(`Failed to fetch daily Wordle: ${response.status} ${response.statusText}`);
             }
 
             const data: DailyWordleData = await response.json();
-            
+
             // Validate the response
             if (!data.solution || data.solution.length !== 5) {
                 throw new Error('Invalid Wordle data: solution is missing or not 5 letters');
@@ -44,6 +47,20 @@ export class DailyWordleService {
     }
 
     /**
+     * Fetch today's wordle solution
+     */
+    public static async getTodaysWordleSolution(): Promise<string> {
+        const data = await this.getTodaysWordleData();
+        return data.solution.toUpperCase();
+    }
+
+    public static async solveTodaysWordle(): Promise<SolveResult> {
+        const todaysWordle = await this.getTodaysWordleSolution();
+        const result = solveWordle(todaysWordle);
+        return result;
+    }
+    
+    /**
      * Fetch Wordle puzzle for a specific date
      */
     public static async getWordleForDate(date: string): Promise<DailyWordleData> {
@@ -57,13 +74,13 @@ export class DailyWordleService {
 
         try {
             const response = await fetch(url);
-            
+
             if (!response.ok) {
                 throw new Error(`Failed to fetch Wordle for ${date}: ${response.status} ${response.statusText}`);
             }
 
             const data: DailyWordleData = await response.json();
-            
+
             // Validate the response
             if (!data.solution || data.solution.length !== 5) {
                 throw new Error('Invalid Wordle data: solution is missing or not 5 letters');
