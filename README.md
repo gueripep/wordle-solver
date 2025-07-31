@@ -1,6 +1,7 @@
 # Wordle Solver
 
 A Wordle solver largely inspired by [this 3Blue1Brown video](https://youtu.be/v68zYyaEmEA?si=PAkyAdpUDy6BNUVB)
+This doesn't use word probability for now
 
 ## 🚀 Quick Start
 
@@ -65,7 +66,7 @@ Excellent! 🔥 Solved in 3 attempts!
 ### Basic Usage
 
 ```typescript
-import { solveWordle, calculateAverageEntropy, findHighestEntropyGuess } from 'wordle-solver';
+import { solveWordle, calculateAverageEntropy, findHighestEntropyGuess } from '@gueripep/wordle-solver';
 
 // Solve a puzzle
 const result = solveWordle('HOUSE');
@@ -79,36 +80,6 @@ console.log(`SLATE entropy: ${entropy.toFixed(4)} bits`);
 const candidates = ['HOUSE', 'CRANE', 'SLATE', 'ADIEU'];
 const best = findHighestEntropyGuess(candidates);
 console.log(`Best word: ${best.guess} (${best.averageEntropy.toFixed(4)} bits)`);
-```
-
-### Advanced Usage
-
-```typescript
-import { 
-  WordleSolver,
-  calculateWordleFeedback,
-  getAvailableWordsFromMultipleFeedbacks,
-  LetterState 
-} from 'wordle-solver';
-
-// Create a solver instance
-const solver = new WordleSolver();
-
-// Manual solving step by step
-const target = 'HOUSE';
-const feedbackHistory = [];
-
-// Make first guess
-let guess = solver.getOptimalFirstGuess(); // "SLATE"
-let feedback = calculateWordleFeedback(guess, target);
-
-feedbackHistory.push({ guess, feedback });
-
-// Filter remaining words
-const remainingWords = getAvailableWordsFromMultipleFeedbacks(feedbackHistory);
-console.log(`${remainingWords.length} words remaining after "${guess}"`);
-
-// Continue until solved...
 ```
 
 ## 🧠 How It Works
@@ -128,15 +99,6 @@ The solver uses an **entropy-maximization approach**:
 - **Word Filtering**: Efficiently narrows down possibilities based on accumulated clues  
 - **Entropy Analysis**: Calculates information content of each possible guess
 - **Optimal Selection**: Chooses the word that provides maximum expected information
-
-### Performance Metrics
-
-| Metric | Value |
-|--------|-------|
-| Success Rate | 99.5%+ |
-| Average Attempts | 3.7 |
-| Max Attempts | 6 |
-| Calculation Speed | ~50ms per word |
 
 ## 🏗️ Architecture
 
@@ -167,27 +129,6 @@ npm run test:coverage
 npm test -- tests/entropy.test.ts
 npm test -- tests/solver.test.ts
 ```
-
-## 📊 Algorithm Details
-
-### Entropy Calculation
-
-For each possible guess, the solver:
-
-1. **Simulates** the guess against all possible target words
-2. **Groups** results by feedback pattern (🟩🟨⬛ combinations)
-3. **Calculates** probability of each feedback pattern
-4. **Computes** information content: `-log₂(probability)`
-5. **Averages** across all patterns to get expected entropy
-
-### Word Filtering
-
-After each guess:
-
-1. **Applies** the received feedback as constraints
-2. **Eliminates** words that don't match the pattern
-3. **Maintains** consistency across multiple guesses
-4. **Optimizes** for performance with efficient algorithms
 
 ### Feedback Rules
 

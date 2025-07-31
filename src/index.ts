@@ -5,14 +5,7 @@
 
 // Core types
 export {
-    LetterState,
-    LetterFeedback,
-    GuessFeedback,
-    GuessWithFeedback,
-    GuessAttempt,
-    SolveResult,
-    GuessFeedbackInformations,
-    HighestEntropyResult
+    GuessAttempt, GuessFeedback, GuessFeedbackInformations, GuessWithFeedback, HighestEntropyResult, LetterFeedback, LetterState, SolveResult
 } from './core/types.js';
 
 // Data access
@@ -34,6 +27,10 @@ export {
 
 // High-level solver service
 export { solveWordle, WordleSolver } from './services/solver.js';
+
+// Daily Wordle and interactive game services
+export { DailyWordleService } from './services/daily-wordle.js';
+export { GameState, InteractiveWordleGame } from './services/interactive-game.js';
 
 // Convenience function for quick solving
 import { solveWordle as solve } from './services/solver.js';

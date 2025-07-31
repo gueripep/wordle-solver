@@ -1,15 +1,55 @@
 {
+  "name": "@gueripep/wordle-solver",
+  "version": "2.0.2",
+  "description": "A Wordle solver using entropy maximization and information theory",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "wordle",
+    "solver",
+    "entropy",
+    "information-theory",
+    "game",
+    "typescript"
+  ],
+  "author": "gueripep",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gueripep/wordle-solver.git"
+  },
+  "homepage": "https://github.com/gueripep/wordle-solver#readme",
+  "bugs": {
+    "url": "https://github.com/gueripep/wordle-solver/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsc && npm run copy-assets",
+    "copy-assets": "powershell -Command \"Copy-Item 'src/data/wordle.csv' 'dist/data/' -Force\"",
+    "dev": "tsx src/cli/index.ts",
+    "test": "node --test --import tsx/esm tests/**/*.test.ts",
+    "test:debug": "node --inspect-brk --test --import tsx/esm tests/**/*.test.ts",
+    "test:watch": "node --test --watch --import tsx/esm tests/**/*.test.ts",
+    "prepublishOnly": "npm run build",
+    "clean": "rimraf dist"
+  },
   "devDependencies": {
     "@types/node": "^24.1.0",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"
-  },
-  "type": "module",
-  "scripts": {
-    "build": "tsc",
-    "dev": "tsx src/cli/index.ts",
-    "test": "node --test --import tsx/esm tests/**/*.test.ts",
-    "test:debug": "node --inspect-brk --test --import tsx/esm tests/**/*.test.ts",
-    "test:watch": "node --test --watch --import tsx/esm tests/**/*.test.ts"
   }
 }

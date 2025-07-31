@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 
 import { calculateAverageEntropy, calculateLetterStateProbabilities } from '../core/entropy.js';
+import { DailyWordleService } from '../services/daily-wordle.js';
+import { InteractiveWordleGame } from '../services/interactive-game.js';
 import { solveWordle } from '../services/solver.js';
 
 /**
  * Simple CLI for testing Wordle solver functions
  */
-function main() {
+async function main() {
     const args = process.argv.slice(2);
     
     if (args.length === 0) {
@@ -25,6 +27,12 @@ function main() {
             break;
         case 'solve':
             handleSolveCommand(args.slice(1));
+            break;
+        case 'play':
+            await handlePlayCommand(args.slice(1));
+            break;
+        case 'daily':
+            await handleDailyCommand(args.slice(1));
             break;
         case 'help':
         case '--help':
@@ -46,6 +54,8 @@ Usage:
   npm run dev entropy <word>           Calculate average entropy for a word
   npm run dev compare <word1> <word2>  Compare average entropy of two words
   npm run dev solve <target>           Solve a Wordle puzzle for a target word
+  npm run dev play <word>              Play interactive Wordle with a custom word
+  npm run dev daily                    Play today's official Wordle puzzle
   npm run dev help                     Show this help message
 
 Examples:
@@ -53,6 +63,8 @@ Examples:
   npm run dev entropy ADIEU
   npm run dev compare HOUSE ADIEU
   npm run dev solve HOUSE
+  npm run dev play HOUSE
+  npm run dev daily
 
 Note: Words should be exactly 5 letters long.
 `);
@@ -231,6 +243,108 @@ function handleSolveCommand(args: string[]) {
         
     } catch (error) {
         console.error('Error solving puzzle:', error);
+        process.exit(1);
+    }
+}
+
+async function handlePlayCommand(args: string[]) {
+    if (args.length !== 1) {
+        console.error('Error: play command requires exactly one word');
+        console.log('Usage: npm run dev play <word>');
+        process.exit(1);
+    }
+    
+    const word = args[0].toUpperCase();
+    
+    if (word.length !== 5) {
+        console.error('Error: Word must be exactly 5 letters long');
+        process.exit(1);
+    }
+    
+    if (!/^[A-Z]+$/.test(word)) {
+        console.error('Error: Word must contain only letters');
+        process.exit(1);
+    }
+    
+    console.log(`\nStarting interactive Wordle game with solution: ${word}`);
+    console.log('Note: In a real game, you wouldn\'t know the solution!');
+    console.log('Press Ctrl+C at any time to quit.\n');
+    
+    try {
+        const game = new InteractiveWordleGame(word.toLowerCase());
+        const result = await game.play();
+        
+        console.log('\n' + '═'.repeat(40));
+        console.log('Game Summary:');
+        console.log(`Attempts: ${result.attempts.length}/${result.maxAttempts}`);
+        console.log(`Result: ${result.isWon ? '🎉 Won!' : '💀 Lost'}`);
+        console.log(`Solution: ${result.solution.toUpperCase()}`);
+        
+    } catch (error) {
+        console.error('Error during game:', error);
+        process.exit(1);
+    }
+}
+
+async function handleDailyCommand(args: string[]) {
+    if (args.length > 1) {
+        console.error('Error: daily command takes no arguments or one date (YYYY-MM-DD)');
+        console.log('Usage: npm run dev daily [YYYY-MM-DD]');
+        process.exit(1);
+    }
+    
+    try {
+        let wordleData;
+        let dateDescription: string;
+        
+        if (args.length === 1) {
+            // Specific date provided
+            const date = args[0];
+            wordleData = await DailyWordleService.getWordleForDate(date);
+            dateDescription = DailyWordleService.formatDate(date);
+        } else {
+            // Today's puzzle
+            wordleData = await DailyWordleService.getTodaysWordle();
+            dateDescription = DailyWordleService.formatDate(wordleData.print_date);
+        }
+        
+        console.log(`\n🗞️  New York Times Wordle #${wordleData.id}`);
+        console.log(`📅 ${dateDescription}`);
+        console.log(`📝 Editor: ${wordleData.editor}`);
+        console.log(`🎯 Day ${wordleData.days_since_launch} since launch`);
+        console.log('\nStarting the puzzle...\n');
+        
+        const game = new InteractiveWordleGame(wordleData.solution.toLowerCase());
+        const result = await game.play();
+        
+        console.log('\n' + '═'.repeat(50));
+        console.log(`NYT Wordle #${wordleData.id} Summary`);
+        console.log('═'.repeat(50));
+        console.log(`Date: ${dateDescription}`);
+        console.log(`Attempts: ${result.attempts.length}/${result.maxAttempts}`);
+        console.log(`Result: ${result.isWon ? '🎉 Solved!' : '💀 Failed'}`);
+        console.log(`Solution: ${result.solution.toUpperCase()}`);
+        
+        if (result.isWon) {
+            // Generate shareable result like the real Wordle
+            console.log('\n📋 Shareable result:');
+            console.log(`Wordle ${wordleData.id} ${result.attempts.length}/6\n`);
+            
+            for (const attempt of result.attempts) {
+                const pattern = attempt.feedback.map(f => {
+                    switch (f.state) {
+                        case 'correct': return '🟩';
+                        case 'present': return '🟨';
+                        case 'absent': return '⬛';
+                        default: return '?';
+                    }
+                }).join('');
+                console.log(pattern);
+            }
+        }
+        
+    } catch (error) {
+        console.error('Error fetching daily Wordle:', error instanceof Error ? error.message : 'Unknown error');
         process.exit(1);
     }
 }
