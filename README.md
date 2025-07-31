@@ -79,7 +79,7 @@ const result = solveWordle('HOUSE');
 console.log(`Solved in ${result.attempts.length} attempts: ${result.solved}`);
 
 // Solve today's wordle
-const result = DailyWordleService.solveTodaysWordle();
+const result = await DailyWordleService.solveTodaysWordle();
 console.log(`Solved in ${result.attempts.length} attempts: ${result.solved}`);
 
 // Calculate entropy for a word
@@ -139,15 +139,6 @@ npm run test:coverage
 npm test -- tests/entropy.test.ts
 npm test -- tests/solver.test.ts
 ```
-
-### Feedback Rules
-
-Implements Wordle's exact feedback system:
-
-- 🟩 **Green**: Letter in correct position
-- 🟨 **Yellow**: Letter in word but wrong position
-- ⬛ **Gray**: Letter not in word
-- **Duplicates**: Handles multiple instances correctly
 
 ## 🔧 Development
 
